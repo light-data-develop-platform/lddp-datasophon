@@ -30,12 +30,14 @@ import com.datasophon.dao.entity.UserInfoEntity;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.lang.StringUtils;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -115,5 +117,32 @@ public class LoginController {
         // clear session
         request.removeAttribute(Constants.SESSION_USER);
         return Result.success();
+    }
+
+    @RequestMapping(
+            method = {RequestMethod.GET, RequestMethod.POST},
+            value = "/loginByLddpToken")
+    public Result loginByLddpToken( @RequestParam(value = "lddpToken") String lddpToken,
+                                    @RequestParam(value = "clientId") String clientId,
+                                    HttpServletRequest request,
+                                    HttpServletResponse response) {
+        if (org.apache.commons.lang3.StringUtils.isBlank(lddpToken)) {
+            return Result.error(-1, "lddpToken shouldn't be null");
+        }
+        if (org.apache.commons.lang3.StringUtils.isBlank(clientId)) {
+            return Result.error(-1, "lddpToken shouldn't be null");
+        }
+
+        Result result  = authenticator.authenticateByLddpToken(lddpToken, clientId);
+
+        response.setStatus(HttpStatus.SC_OK);
+        Map<String, String> cookieMap = (Map<String, String>) result.getData();
+        for (Map.Entry<String, String> cookieEntry : cookieMap.entrySet()) {
+            Cookie cookie = new Cookie(cookieEntry.getKey(), cookieEntry.getValue());
+            cookie.setHttpOnly(true);
+            response.addCookie(cookie);
+        }
+
+        return result;
     }
 }

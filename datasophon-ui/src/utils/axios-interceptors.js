@@ -116,7 +116,7 @@ const reqCommon = {
   onFulfilled(config, options) {
     const {message} = options
     const {url, xsrfCookieName} = config
-    if (url.indexOf('login') === -1 && xsrfCookieName && !Cookie.get(xsrfCookieName)) {
+    if (url.indexOf('login') === -1 && url.indexOf('api') === -1 && xsrfCookieName && !Cookie.get(xsrfCookieName)) {
       localStorage.setItem('isCluster', '')
       localStorage.setItem('clusterId', '')
       localStorage.setItem('menuData', '[]')

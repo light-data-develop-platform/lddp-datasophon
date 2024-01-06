@@ -1,7 +1,9 @@
 import {hasAuthority} from '@/utils/authority-utils'
 import {loginIgnore} from '@/router/index'
-import {checkAuthorization} from '@/utils/request'
+import {checkAuthorization, setAuthorization} from '@/utils/request'
 import NProgress from 'nprogress'
+import {axiosGet} from '@/api/request'
+import store from '@/store'
 
 NProgress.configure({ showSpinner: false })
 
@@ -26,15 +28,41 @@ const progressStart = (to, from, next) => {
  * @param next
  * @param options
  */
-const loginGuard = (to, from, next, options) => {
-  const {message} = options
+const loginGuard = async (to, from, next, options) => {
+  console.log(to, from, next, options);
   if (!loginIgnore.includes(to) && !checkAuthorization()) {
-    message.warning('登录已失效，请重新登录')
-    next({path: '/login'})
+    const hashStr = window.location.hash
+    console.log(hashStr);
+    // 如果需要接口授权
+    if (hashStr?.includes('lddpToken')) {
+      try {
+        await userCenterLogin(hashStr.split('?')[1])
+        next()
+      } catch (e) {
+        window.location.reload()
+      }
+    } else {
+      next({ path: '/login' })
+    }
   } else {
     next()
   }
 }
+
+const userCenterLogin =  (parmas) => {
+  axiosGet('/ddh/loginByLddpToken?' + parmas).then((res) => {
+    console.log(res);
+    if (res.code === 200) {
+      setAuthorization({ sessionId: res.data.sessionId })
+      store.commit('account/setUser', res.userInfo)
+      loadRoutes()
+      store.commit('setting/setIsCluster', '')
+      this.$router.push('/colony-manage/colony-list')
+      // this.$message.success("登录成功", 3);
+    }
+  })
+}
+
 
 /**
  * 权限守卫

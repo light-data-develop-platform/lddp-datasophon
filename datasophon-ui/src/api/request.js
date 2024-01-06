@@ -33,7 +33,7 @@ const handleParams = function(data) {
   return params
 }
 
-const axiosGet = function(url, params = {}) {
+export const axiosGet = function(url, params = {}) {
   return new Promise((resolve, reject) => {
     axios({
       method: 'get',

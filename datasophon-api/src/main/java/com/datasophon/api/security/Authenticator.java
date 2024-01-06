@@ -41,4 +41,13 @@ public interface Authenticator {
      * @return user
      */
     UserInfoEntity getAuthUser(HttpServletRequest request);
+
+    /**
+     * Verifying legality via username and password
+     *
+     * @param lddpToken
+     * @param clientId
+     * @return result object
+     */
+    Result authenticateByLddpToken(String lddpToken, String clientId);
 }

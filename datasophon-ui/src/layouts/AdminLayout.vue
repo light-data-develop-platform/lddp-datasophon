@@ -184,6 +184,10 @@ export default {
   created() {
     this.correctPageMinHeight(this.minHeight - 24)
     this.setActivated(this.$route)
+
+    const {query} = this.$route;
+    const {hideMenu} = query
+    this.hideMenu = hideMenu;
   },
   beforeDestroy() {
     this.correctPageMinHeight(-this.minHeight + 24)
